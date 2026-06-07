@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <!--
+  ╔═══════════════════════════════════════════════════╗
+  ║   🍺 TAGAYAN SYSTEM — FULL APK-READY BUILD 🍺    ║
+  ╠═══════════════════════════════════════════════════╣
+  ║  CAPACITOR (best quality):                        ║
+  ║   npm init -y                                     ║
+  ║   npm i @capacitor/core @capacitor/cli            ║
+  ║       @capacitor/android                          ║
+  ║   npx cap init "Tagayan" "com.tagayan.app"        ║
+  ║       --web-dir www                               ║
+  ║   mkdir www                                       ║
+  ║   cp TAGAYANN_APK_READY.html www/index.html       ║
+  ║   npx cap add android                             ║
+  ║   npx cap copy                                    ║
+  ║   npx cap open android  ← build APK here          ║
+  ╠═══════════════════════════════════════════════════╣
+  ║  AndroidManifest.xml — add inside <manifest>:     ║
+  ║   <uses-permission                                ║
+  ║     android:name=                                 ║
+  ║     "android.permission.CAMERA"/>                 ║
+  ║   <uses-permission                                ║
+  ║     android:name=                                 ║
+  ║     "android.permission.RECORD_AUDIO"/>           ║
+  ║   <uses-feature                                   ║
+  ║     android:name="android.hardware.camera"        ║
+  ║     android:required="false"/>                    ║
+  ║   <uses-feature                                   ║
+  ║     android:name="android.hardware.camera.front"  ║
+  ║     android:required="false"/>                    ║
+  ╠═══════════════════════════════════════════════════╣
+  ║  EASY: Upload to https://webintoapp.com           ║
+  ║        Enable Camera permission in their UI       ║
+  ╚═══════════════════════════════════════════════════╝
+  -->
+  <!-- Mobile / APK Meta Tags -->
+  <meta content="width=device-width, initial-scale=1.0,
+                 viewport-fit=cover, user-scalable=no" name="viewport"/>
+  <meta content="yes" name="mobile-web-app-capable"/>
+  <meta content="yes" name="apple-mobile-web-app-capable"/>
+  <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+  <meta content="Tagayan" name="apple-mobile-web-app-title"/>
+  <meta content="#1c1007" name="theme-color"/>
+  <meta content="#1c1007" name="msapplication-TileColor"/>
+  <title>
+   🍺 Tagayan System
+  </title>
+  <!-- Google Fonts (with offline system-font fallback) -->
+  <link crossorigin="" href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Nunito:wght@400;600;700;900&amp;display=swap" media="all" rel="stylesheet"/>
+  <link href="style.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <div class="app">
+   <div class="header">
+    <h1>
+     🍺 TAGAYAN
+    </h1>
+    <p>
+     Sino ang mag-iinom ngayon?
+    </p>
+   </div>
+   <div class="stats-bar">
+    <div class="stat-chip">
+     Round
+     <span id="roundNum">
+      1
+     </span>
+    </div>
+    <div class="stat-chip">
+     Players
+     <span id="playerCount">
+      0
+     </span>
+    </div>
+    <div class="stat-chip">
+     Shots
+     <span id="totalShots">
+      0
+     </span>
+    </div>
+   </div>
+   <div class="timer-banner">
+    <div class="tb-label" id="timerLabel">
+     🔔 Drink Timer — Iinomin o Dodoblehin
+    </div>
+    <div class="tb-time" id="timerDisplay">
+     5:00
+    </div>
+    <div class="tb-sub" id="timerSub">
+     Walang nag-iinom → 🔊 ALARM tutunog!
+    </div>
+    <div class="tb-row">
+     <button class="tb-btn tb-start" onclick="startTimer()">
+      ▶ Start
+     </button>
+     <button class="tb-btn tb-stop" onclick="stopTimer()">
+      ■ Stop
+     </button>
+     <select class="tb-select" id="timeoutSel" onchange="changeTimeout()">
+      <option value="30">
+       30 sec
+      </option>
+      <option value="60">
+       1 min
+      </option>
+      <option value="120">
+       2 min
+      </option>
+      <option value="180">
+       3 min
+      </option>
+      <option selected="" value="300">
+       5 min
+      </option>
+      <option value="600">
+       10 min
+      </option>
+     </select>
+    </div>
+   </div>
+   <div class="section active" id="mainMenu">
+    <div class="menu-grid">
+     <button class="menu-btn" onclick="go('addPlayer')">
+      <span class="icon">
+       ➕
+      </span>
+      Add Player
+     </button>
+     <button class="menu-btn" onclick="go('takeShot')">
+      <span class="icon">
+       🍻
+      </span>
+      Take Shot
+     </button>
+     <button class="menu-btn" onclick="go('leaderboard')">
+      <span class="icon">
+       🏆
+      </span>
+      Leaderboard
+     </button>
+     <button class="menu-btn" onclick="doNextRound()">
+      <span class="icon">
+       ➡️
+      </span>
+      Next Round
+     </button>
+     <button class="menu-btn danger" onclick="go('removePlayer')">
+      <span class="icon">
+       ❌
+      </span>
+      Remove Player
+     </button>
+     <button class="menu-btn danger" onclick="confirmReset()">
+      <span class="icon">
+       🔄
+      </span>
+      Reset Game
+     </button>
+    </div>
+   </div>
+   <div class="section" id="addPlayer">
+    <div class="section-title">
+     ➕ Add Player
+    </div>
+    <div class="input-group">
+     <input id="playerNameInput" maxlength="20" placeholder="Enter player name…" type="text"/>
+    </div>
+    <!-- Camera capture -->
+    <div class="camera-wrap">
+     <video autoplay="" class="cam-preview" id="camVideo" muted="" playsinline="">
+     </video>
+     <canvas class="cam-canvas" id="camCanvas">
+     </canvas>
+     <img alt="Player photo" class="cam-photo" id="camPhoto"/>
+     <div class="cam-status" id="camStatus">
+      📸 Optional: capture a player photo
+     </div>
+     <div id="camBtnRow" style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="cam-snap" id="camBtn" onclick="handleCamBtn()" style="flex:1">
+       📷 Open Camera
+      </button>
+      <button class="cam-snap cam-retake" id="camSwitchBtn" onclick="switchCamera()" style="display:none;flex:0 0 auto;">
+       🔄
+      </button>
+     </div>
+     <button class="cam-snap cam-retake" id="camRetakeBtn" onclick="retakePhoto()" style="display:none; margin-top:6px;">
+      🔄 Retake
+     </button>
+    </div>
+    <button class="btn btn-primary" onclick="addPlayer()">
+     Add Player
+    </button>
+    <button class="btn btn-back" onclick="cancelAddPlayer()">
+     ← Back
+    </button>
+   </div>
+   <div class="section" id="takeShot">
+    <div class="section-title">
+     🍻 Take Shot
+    </div>
+    <div id="drinkOrderWrap" style="margin-bottom:18px;display:none;">
+     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;color:var(--amber-light);opacity:.8;">
+       DRINK ORDER
+      </div>
+     </div>
+     <div id="drinkOrderList">
+     </div>
+    </div>
+    <div class="player-list" id="shotList">
+    </div>
+    <button class="btn btn-back" onclick="go('mainMenu')">
+     ← Back
+    </button>
+   </div>
+   <div class="section" id="leaderboard">
+    <div class="section-title">
+     🏆 Leaderboard
+    </div>
+    <div class="lb-list" id="lbList">
+    </div>
+    <button class="btn btn-primary" onclick="showReceipt()" style="margin-bottom:10px;">
+     🧾 View &amp; Download Receipt
+    </button>
+    <button class="btn btn-back" onclick="go('mainMenu')">
+     ← Back
+    </button>
+   </div>
+   <div class="section" id="removePlayer">
+    <div class="section-title">
+     ❌ Remove Player
+    </div>
+    <div class="player-list" id="removeList">
+    </div>
+    <button class="btn btn-back" onclick="go('mainMenu')">
+     ← Back
+    </button>
+   </div>
+  </div>
+  <div id="toast">
+  </div>
+  <!-- Receipt Modal -->
+  <div id="receiptOverlay">
+   <div id="receiptModal">
+    <div class="receipt-wrap">
+     <div class="receipt-header">
+      <div class="r-beers">
+       🍺🍻🍺
+      </div>
+      <h2>
+       TAGAYAN
+      </h2>
+      <div class="r-sub">
+       Official Drinking Receipt
+      </div>
+     </div>
+     <hr class="receipt-divider"/>
+     <div class="receipt-body" id="receiptBody">
+      <!-- filled by JS -->
+     </div>
+     <div class="receipt-footer">
+      <div class="r-barcode" id="receiptBarcode">
+      </div>
+      <div class="r-footer-msg">
+       🍺 SALAMAT SA TAGAY! 🍺
+      </div>
+      <div class="r-footer-small">
+       Drink responsibly. Keep hydrated. 💧
+      </div>
+     </div>
+    </div>
+    <div class="receipt-actions">
+     <button class="btn r-close" onclick="closeReceipt()" style="flex:1">
+      ✕ Close
+     </button>
+     <button class="btn r-download" onclick="downloadReceipt()" style="flex:2">
+      ⬇️ Download Receipt
+     </button>
+    </div>
+   </div>
+  </div>
+  <div id="modalOverlay">
+   <div id="modalBox">
+    <p id="modalMsg">
+    </p>
+    <div class="modal-actions">
+     <button class="btn btn-back" onclick="closeModal(false)" style="flex:1">
+      Cancel
+     </button>
+     <button class="btn btn-danger" id="modalConfirmBtn" style="flex:1">
+      Confirm
+     </button>
+    </div>
+   </div>
+  </div>
+  <div id="voiceAlert">
+   <div class="va-beer">
+    🍺
+   </div>
+   <div class="va-big" id="vaBig">
+    INOM NA!
+   </div>
+   <div class="va-sub" id="vaSub">
+    TAGAY NA!!!
+   </div>
+   <div class="va-names" id="vaNames">
+   </div>
+   <button class="va-dismiss" onclick="dismissAlert()">
+    ✅ OK NA! INIINOM NA!
+   </button>
+   <button class="va-repeat" onclick="repeatAlarm()">
+    🔊 Ulitin
+   </button>
+  </div>
+  <script src="script.js">
+  </script>
+ </body>
+</html>
